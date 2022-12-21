@@ -3,6 +3,7 @@ package istio_test
 import (
 	"context"
 	"fmt"
+
 	gatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	"github.com/kyma-incubator/api-gateway/internal/processing"
 	. "github.com/kyma-incubator/api-gateway/internal/processing/internal/test"
@@ -316,7 +317,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 	})
 
 	When("additional handler to JWT", func() {
-		It("should create AP for allow without From spec", func() {
+		It("should create AP for allow with From having Source.Principals == cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account", func() {
 			// given
 			jwt := createIstioJwtAccessStrategy()
 			allow := &gatewayv1beta1.Authenticator{
@@ -354,15 +355,17 @@ var _ = Describe("Authorization Policy Processor", func() {
 				expectedHandlers := []string{HeadersApiPath, ImgApiPath}
 				Expect(slices.Contains(expectedHandlers, ap.Spec.Rules[0].To[0].Operation.Paths[0])).To(BeTrue())
 
-				if ap.Spec.Rules[0].To[0].Operation.Paths[0] == HeadersApiPath {
-					Expect(len(ap.Spec.Rules[0].From)).To(Equal(0))
-				} else if ap.Spec.Rules[0].To[0].Operation.Paths[0] == ImgApiPath {
+				switch ap.Spec.Rules[0].To[0].Operation.Paths[0] {
+				case HeadersApiPath:
+					Expect(len(ap.Spec.Rules[0].From)).To(Equal(1))
+					Expect(ap.Spec.Rules[0].From[0].Source.Principals[0]).To(Equal("cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"))
+				case ImgApiPath:
 					Expect(len(ap.Spec.Rules[0].From)).To(Equal(1))
 				}
 			}
 		})
 
-		It("should create AP for noop without From spec", func() {
+		It("should create AP for noop with From spec having Source.Principals == cluster.local/ns/kyma-system/sa/oathkeeper-maester-account", func() {
 			// given
 			jwt := createIstioJwtAccessStrategy()
 			noop := &gatewayv1beta1.Authenticator{
@@ -400,9 +403,11 @@ var _ = Describe("Authorization Policy Processor", func() {
 				expectedHandlers := []string{HeadersApiPath, ImgApiPath}
 				Expect(slices.Contains(expectedHandlers, ap.Spec.Rules[0].To[0].Operation.Paths[0])).To(BeTrue())
 
-				if ap.Spec.Rules[0].To[0].Operation.Paths[0] == HeadersApiPath {
-					Expect(len(ap.Spec.Rules[0].From)).To(Equal(0))
-				} else if ap.Spec.Rules[0].To[0].Operation.Paths[0] == ImgApiPath {
+				switch ap.Spec.Rules[0].To[0].Operation.Paths[0] {
+				case HeadersApiPath:
+					Expect(len(ap.Spec.Rules[0].From)).To(Equal(1))
+					Expect(ap.Spec.Rules[0].From[0].Source.Principals[0]).To(Equal("cluster.local/ns/kyma-system/sa/oathkeeper-maester-account"))
+				case ImgApiPath:
 					Expect(len(ap.Spec.Rules[0].From)).To(Equal(1))
 				}
 			}
@@ -620,7 +625,13 @@ var _ = Describe("Authorization Policy Processor", func() {
 						})),
 						"Rules": ContainElements(
 							PointTo(MatchFields(IgnoreExtras, Fields{
-								"From": BeNil(),
+								"From": ContainElement(
+									PointTo(MatchFields(IgnoreExtras, Fields{
+										"Source": PointTo(MatchFields(IgnoreExtras, Fields{
+											"Principals": ContainElements("cluster.local/ns/kyma-system/sa/oathkeeper-maester-account"),
+										})),
+									})),
+								),
 								"To": ContainElements(
 									PointTo(MatchFields(IgnoreExtras, Fields{
 										"Operation": PointTo(MatchFields(IgnoreExtras, Fields{
