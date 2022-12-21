@@ -171,5 +171,3 @@ func ToCSVList(input []string) string {
 
 	return res
 }
-
-var ActionToString = func(a processing.Action) string { return a.String() }

@@ -3,6 +3,7 @@ package istio_test
 import (
 	"context"
 	"fmt"
+
 	"github.com/kyma-incubator/api-gateway/internal/processing"
 	"istio.io/api/security/v1beta1"
 	typev1beta1 "istio.io/api/type/v1beta1"
@@ -11,7 +12,7 @@ import (
 	gatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	. "github.com/kyma-incubator/api-gateway/internal/processing/internal/test"
 	"github.com/kyma-incubator/api-gateway/internal/processing/istio"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
@@ -254,7 +255,7 @@ var _ = Describe("Request Authentication Processor", func() {
 		// then
 		Expect(err).To(BeNil())
 		Expect(result).To(HaveLen(1))
-		Expect(result[0].Action.String()).To(Equal("create"))
+		Expect(result[0].Action).To(Equal(processing.Create))
 	})
 
 	It("should delete RA when there is no rule configured in ApiRule", func() {
@@ -291,7 +292,7 @@ var _ = Describe("Request Authentication Processor", func() {
 		// then
 		Expect(err).To(BeNil())
 		Expect(result).To(HaveLen(1))
-		Expect(result[0].Action.String()).To(Equal("delete"))
+		Expect(result[0].Action).To(Equal(processing.Delete))
 	})
 
 	When("RA with JWT config exists", func() {
@@ -333,7 +334,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			// then
 			Expect(err).To(BeNil())
 			Expect(result).To(HaveLen(1))
-			Expect(result[0].Action.String()).To(Equal("update"))
+			Expect(result[0].Action).To(Equal(processing.Update))
 		})
 
 		It("should delete and create new RA when only service name in JWT Rule has changed", func() {
@@ -374,7 +375,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			Expect(result).To(HaveLen(2))
 
 			deleteMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("delete")),
+				"Action": Equal(processing.Delete),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -391,7 +392,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			}))
 
 			createMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -451,7 +452,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			Expect(result).To(HaveLen(2))
 
 			updateResultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -468,7 +469,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			}))
 
 			createResultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -526,7 +527,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			Expect(result).To(HaveLen(2))
 
 			createResultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -543,7 +544,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			}))
 
 			deleteResultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("delete")),
+				"Action": Equal(processing.Delete),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -629,7 +630,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			Expect(result).To(HaveLen(3))
 
 			createFirstServiceRaResultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -646,7 +647,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			}))
 
 			deleteFirstServiceRaResultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("delete")),
+				"Action": Equal(processing.Delete),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -663,7 +664,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			}))
 
 			secondRaResultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -745,7 +746,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			Expect(result).To(HaveLen(2))
 
 			deleteResultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("delete")),
+				"Action": Equal(processing.Delete),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -762,7 +763,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			}))
 
 			updateResultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -846,7 +847,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			Expect(result).To(HaveLen(3))
 
 			firstRaMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -863,7 +864,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			}))
 
 			secondRaMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -880,7 +881,7 @@ var _ = Describe("Request Authentication Processor", func() {
 			}))
 
 			newRaMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{

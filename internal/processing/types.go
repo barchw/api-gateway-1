@@ -8,18 +8,18 @@ import (
 type Action int
 
 const (
-	create Action = iota
-	update
-	delete
+	Create Action = iota
+	Update
+	Delete
 )
 
 func (s Action) String() string {
 	switch s {
-	case create:
+	case Create:
 		return "create"
-	case update:
+	case Update:
 		return "update"
-	case delete:
+	case Delete:
 		return "delete"
 	}
 	return "unknown"
@@ -32,21 +32,21 @@ type ObjectChange struct {
 
 func NewObjectCreateAction(obj client.Object) *ObjectChange {
 	return &ObjectChange{
-		Action: create,
+		Action: Create,
 		Obj:    obj,
 	}
 }
 
 func NewObjectUpdateAction(obj client.Object) *ObjectChange {
 	return &ObjectChange{
-		Action: update,
+		Action: Update,
 		Obj:    obj,
 	}
 }
 
 func NewObjectDeleteAction(obj client.Object) *ObjectChange {
 	return &ObjectChange{
-		Action: delete,
+		Action: Delete,
 		Obj:    obj,
 	}
 }

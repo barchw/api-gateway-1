@@ -3,11 +3,12 @@ package istio_test
 import (
 	"context"
 	"fmt"
+
 	gatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	"github.com/kyma-incubator/api-gateway/internal/processing"
 	. "github.com/kyma-incubator/api-gateway/internal/processing/internal/test"
 	"github.com/kyma-incubator/api-gateway/internal/processing/istio"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	"golang.org/x/exp/slices"
@@ -354,9 +355,10 @@ var _ = Describe("Authorization Policy Processor", func() {
 				expectedHandlers := []string{HeadersApiPath, ImgApiPath}
 				Expect(slices.Contains(expectedHandlers, ap.Spec.Rules[0].To[0].Operation.Paths[0])).To(BeTrue())
 
-				if ap.Spec.Rules[0].To[0].Operation.Paths[0] == HeadersApiPath {
+				switch ap.Spec.Rules[0].To[0].Operation.Paths[0] {
+				case HeadersApiPath:
 					Expect(len(ap.Spec.Rules[0].From)).To(Equal(0))
-				} else if ap.Spec.Rules[0].To[0].Operation.Paths[0] == ImgApiPath {
+				case ImgApiPath:
 					Expect(len(ap.Spec.Rules[0].From)).To(Equal(1))
 				}
 			}
@@ -428,7 +430,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 		// then
 		Expect(err).To(BeNil())
 		Expect(result).To(HaveLen(1))
-		Expect(result[0].Action.String()).To(Equal("create"))
+		Expect(result[0].Action).To(Equal(processing.Create))
 	})
 
 	It("should update existing AP when path, methods and service name didn't change", func() {
@@ -480,7 +482,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 		Expect(result).To(HaveLen(1))
 
 		resultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-			"Action": WithTransform(ActionToString, Equal("update")),
+			"Action": Equal(processing.Update),
 			"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 				"Spec": MatchFields(IgnoreExtras, Fields{
 					"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -612,7 +614,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			Expect(result).To(HaveLen(2))
 
 			updatedToNoopMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -636,7 +638,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			}))
 
 			notChangedMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -711,7 +713,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 		Expect(result).To(HaveLen(1))
 
 		resultMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-			"Action": WithTransform(ActionToString, Equal("delete")),
+			"Action": Equal(processing.Delete),
 			"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 				"Spec": MatchFields(IgnoreExtras, Fields{
 					"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -784,7 +786,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			Expect(result).To(HaveLen(2))
 
 			existingApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -807,7 +809,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			}))
 
 			newApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -879,7 +881,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			Expect(result).To(HaveLen(2))
 
 			existingApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -902,7 +904,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			}))
 
 			newApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -974,7 +976,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			Expect(result).To(HaveLen(2))
 
 			existingApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -997,7 +999,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			}))
 
 			newApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -1071,7 +1073,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			Expect(result).To(HaveLen(2))
 
 			existingApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("delete")),
+				"Action": Equal(processing.Delete),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -1094,7 +1096,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			}))
 
 			newApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -1197,7 +1199,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			Expect(result).To(HaveLen(3))
 
 			unchangedApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -1220,7 +1222,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			}))
 
 			deleteApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("delete")),
+				"Action": Equal(processing.Delete),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -1243,7 +1245,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			}))
 
 			updatedApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -1345,7 +1347,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			Expect(result).To(HaveLen(3))
 
 			unchangedApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("update")),
+				"Action": Equal(processing.Update),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -1368,7 +1370,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			}))
 
 			deleteApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("delete")),
+				"Action": Equal(processing.Delete),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
@@ -1391,7 +1393,7 @@ var _ = Describe("Authorization Policy Processor", func() {
 			}))
 
 			updatedApMatcher := PointTo(MatchFields(IgnoreExtras, Fields{
-				"Action": WithTransform(ActionToString, Equal("create")),
+				"Action": Equal(processing.Create),
 				"Obj": PointTo(MatchFields(IgnoreExtras, Fields{
 					"Spec": MatchFields(IgnoreExtras, Fields{
 						"Selector": PointTo(MatchFields(IgnoreExtras, Fields{
