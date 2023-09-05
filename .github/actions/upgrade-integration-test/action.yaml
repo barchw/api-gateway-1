@@ -18,7 +18,6 @@ runs:
       env:
         KYMA_DOMAIN: "local.kyma.dev"
       run: |
-        kubectl config use-context k3d-test-cluster-1
         sudo curl -Lo /usr/bin/kyma https://storage.googleapis.com/kyma-cli-unstable/kyma-linux
         sudo chmod +x /usr/bin/kyma
         kyma provision k3d
