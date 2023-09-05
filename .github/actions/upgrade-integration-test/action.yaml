@@ -26,9 +26,6 @@ runs:
         sudo echo "127.0.0.1 local.kyma.dev" | sudo tee -a /etc/hosts
     - name: Run upgrade integration test
       env:
-        CLIENT_ID: ${{ secrets.CLIENT_ID }}
-        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-        OIDC_ISSUER_URL: ${{ secrets.OIDC_ISSUER_URL }}
         KYMA_DOMAIN: "local.kyma.dev"
       run: |
         kubectl config use-context k3d-test-cluster-1
