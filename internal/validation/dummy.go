@@ -7,6 +7,7 @@ import (
 // dummy is an handler validator that does nothing
 type dummyHandlerValidator struct{}
 
+
 func (dummy *dummyHandlerValidator) Validate(attrPath string, handler *gatewayv1beta1.Handler) []Failure {
 	return nil
 }
