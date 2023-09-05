@@ -1,40 +1,27 @@
-name: 'Upgrade integration test'
-description: 'Runs upgrade suite of integration tests'
+name: 'Wait for job'
+description: 'Waits for given job (check) to succeed or fails'
 inputs:
-  upgrade-image-name:
-    description: 'Image that will api-gateway be upgraded to'
+  job-name:
+    description: 'Job name (check) for which we want to wait'
     required: true
+  github-auth-token:
+    description: 'Github token which comes from secrets.GITHUB_TOKEN'
+    required: true
+  timeout:
+    description: 'Timeout for job finish'
+    required: false
+    default: "1800"
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-go@v4
+    - name: Wait for job to succeed
+      uses: autotelic/action-wait-for-status-check@6556cf50c8fb6608412945382eae73581f56cbb4 # not versioned
+      id: wait-for-status
       with:
-        go-version: "1.20"
-    - name: Create Single Cluster
-      uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79 #v2.4.0
-      with:
-        cluster-name: "test-cluster-1"
-        args: >-          
-          --agents 2
-          --servers-memory=16g
-          --port 80:80@loadbalancer
-          --port 443:443@loadbalancer
-          --k3s-arg "--disable=traefik@server:0"
-    - name: Add local.kyma.dev to /etc/hosts
+        token: ${{ inputs.github-auth-token }}
+        statusName: ${{ inputs.job-name }}
+        timeoutSeconds: ${{ inputs.timeout }}
+    - name: Check if build status is success
+      if: steps.wait-for-status.outputs.state != 'success'
+      run: exit 1
       shell: bash
-      run: |
-        sudo echo "127.0.0.1 local.kyma.dev" | sudo tee -a /etc/hosts
-    - name: Run upgrade integration test
-      env:
-        CLIENT_ID: ${{ .Secrets.CLIENT_ID }}
-        CLIENT_SECRET: ${{ .Secrets.CLIENT_SECRET }}
-        OIDC_ISSUER_URL: ${{ .Secrets.OIDC_ISSUER_URL }}
-        KYMA_DOMAIN: "local.kyma.dev"
-      run: |
-        kubectl config use-context k3d-test-cluster-1
-        EXPORT_RESULT=true TEST_UPGRADE_IMG=${{ inputs.operator-image-name }} make install-kyma test-upgrade
-      shell: bash
-    - uses: actions/upload-artifact@v3
-      with:
-        name: html-reports
-        path: tests/integration/reports/
