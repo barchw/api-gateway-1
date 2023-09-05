@@ -29,7 +29,7 @@ runs:
         KYMA_DOMAIN: "local.kyma.dev"
       run: |
         kubectl config use-context k3d-test-cluster-1
-        EXPORT_RESULT=true TEST_UPGRADE_IMG=${{ inputs.operator-image-name }} make install-kyma test-upgrade
+        EXPORT_RESULT=true TEST_UPGRADE_IMG=${{ inputs.operator-image-name }} make kyma-cli install-kyma test-upgrade
       shell: bash
     - uses: actions/upload-artifact@v3
       with:
