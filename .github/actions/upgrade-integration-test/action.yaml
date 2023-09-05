@@ -20,6 +20,7 @@ runs:
           --port 80:80@loadbalancer
           --port 443:443@loadbalancer
           --k3s-arg "--disable=traefik@server:0"
+          --registry-create
     - name: Add local.kyma.dev to /etc/hosts
       shell: bash
       run: |
