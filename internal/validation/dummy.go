@@ -13,6 +13,7 @@ func (dummy *dummyHandlerValidator) Validate(attrPath string, handler *gatewayv1
 
 type dummyAccessStrategiesValidator struct{}
 
+
 func (dummy *dummyAccessStrategiesValidator) Validate(attrPath string, accessStrategies []*gatewayv1beta1.Authenticator) []Failure {
 	return nil
 }
