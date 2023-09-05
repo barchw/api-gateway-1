@@ -18,7 +18,7 @@ runs:
       env:
         KYMA_DOMAIN: "local.kyma.dev"
       run: |
-        go install github.com/k3d-io/k3d/v5@latest
+        wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | sudo bash
         sudo curl -Lo /usr/bin/kyma https://storage.googleapis.com/kyma-cli-unstable/kyma-linux
         sudo chmod +x /usr/bin/kyma
         kyma provision k3d
