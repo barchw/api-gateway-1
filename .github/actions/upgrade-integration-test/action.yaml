@@ -22,7 +22,8 @@ runs:
         sudo curl -Lo /usr/bin/kyma https://storage.googleapis.com/kyma-cli-unstable/kyma-linux
         sudo chmod +x /usr/bin/kyma
         sudo kyma provision k3d
-        EXPORT_RESULT=true TEST_UPGRADE_IMG=${{ inputs.operator-image-name }} make install-kyma test-upgrade
+        k3d kubeconfig merge kyma
+        KUBECONFIG=~/.k3d/kubeconfig-kyma.yaml EXPORT_RESULT=true TEST_UPGRADE_IMG=${{ inputs.operator-image-name }} make install-kyma test-upgrade
       shell: bash
     - uses: actions/upload-artifact@v3
       with:
