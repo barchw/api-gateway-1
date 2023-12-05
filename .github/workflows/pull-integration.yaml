@@ -30,10 +30,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/wait-for-job-succeed-or-fail
-        with:
-          job-name: 'pull-api-gateway-manager-build'
-          github-auth-token: ${{ secrets.GITHUB_TOKEN }}
 
   integration-tests:
     name: Integration tests
