@@ -22,7 +22,7 @@ on:
 
 jobs:
   wait-for-image-build:
-    environment: ${{ github.event.pull_request.author_association != 'COLLABORATOR' && github.event.pull_request.author_association != 'OWNER' && 'restricted' || 'internal' }}
+    environment: ${{ 'restricted' }}
     name: Wait for image build
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
@@ -30,10 +30,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/wait-for-job-succeed-or-fail
-        with:
-          job-name: 'pull-api-gateway-manager-build'
-          github-auth-token: ${{ secrets.GITHUB_TOKEN }}
 
   integration-tests:
     name: Integration tests
