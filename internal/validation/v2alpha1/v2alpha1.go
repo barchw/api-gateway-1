@@ -188,8 +188,8 @@ func ownedBy(vs *networkingv1beta1.VirtualService, api *gatewayv2alpha1.APIRule)
 }
 
 func getOwnerLabels(api *gatewayv2alpha1.APIRule) map[string]string {
-	OwnerLabelv1beta1 := fmt.Sprintf("%s.%s", "apirule", gatewayv1beta1.GroupVersion.String())
+	OwnerLabelV1beta1 := fmt.Sprintf("%s.%s", "apirule", gatewayv1beta1.GroupVersion.String())
 	labels := make(map[string]string)
-	labels[OwnerLabelv1beta1] = fmt.Sprintf("%s.%s", api.ObjectMeta.Name, api.ObjectMeta.Namespace)
+	labels[OwnerLabelV1beta1] = fmt.Sprintf("%s.%s", api.ObjectMeta.Name, api.ObjectMeta.Namespace)
 	return labels
 }
