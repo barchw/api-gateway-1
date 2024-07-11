@@ -2,6 +2,7 @@ package v2alpha1
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/kyma-project/api-gateway/apis/gateway/v1beta1"
@@ -31,6 +32,8 @@ func convertMap(m map[v1beta1.StatusCode]State) map[State]v1beta1.StatusCode {
 
 // The 2 => 1 map is generated automatically based on 1 => 2 map
 var alpha1to1beta1statusConversionMap = convertMap(beta1toV2alpha1StatusConversionMap)
+
+const v2alpha1HostsAnnotation = "gateway.kyma-project.io/v2alpha1-hosts"
 
 // Converts this ApiRule (v2alpha1) to the Hub version (v1beta1)
 func (apiRuleV2Alpha1 *APIRule) ConvertTo(hub conversion.Hub) error {
@@ -85,6 +88,15 @@ func (apiRuleV2Alpha1 *APIRule) ConvertTo(hub conversion.Hub) error {
 	if len(apiRuleV2Alpha1.Spec.Hosts) > 0 {
 		// Only one host is supported in v1beta1, so we use the first one from the list
 		strHost := string(*apiRuleV2Alpha1.Spec.Hosts[0])
+		var hosts strings.Builder
+		for i, host := range apiRuleV2Alpha1.Spec.Hosts {
+			if i > 0 {
+				hosts.WriteString(",")
+			}
+			hosts.WriteString(string(*host))
+		}
+
+		apiRuleBeta1.Annotations[v2alpha1HostsAnnotation] = hosts.String()
 		apiRuleBeta1.Spec.Host = &strHost
 	}
 
@@ -178,7 +190,16 @@ func (apiRuleV2Alpha1 *APIRule) ConvertFrom(hub conversion.Hub) error {
 		}
 	}
 
-	if apiRuleBeta1.Spec.Host != nil {
+	// Hosts
+	val, ok := apiRuleBeta1.Annotations[v2alpha1HostsAnnotation]
+	if ok {
+		hosts := strings.Split(val, ",")
+		apiRuleV2Alpha1.Spec.Hosts = make([]*Host, len(hosts))
+		for i, host := range hosts {
+			apiRuleV2Alpha1.Spec.Hosts[i] = new(Host)
+			*apiRuleV2Alpha1.Spec.Hosts[i] = Host(host)
+		}
+	} else if apiRuleBeta1.Spec.Host != nil {
 		apiRuleV2Alpha1.Spec.Hosts = []*Host{new(Host)}
 		*apiRuleV2Alpha1.Spec.Hosts[0] = Host(*apiRuleBeta1.Spec.Host)
 	}
