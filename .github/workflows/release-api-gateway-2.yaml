@@ -50,7 +50,7 @@ jobs:
     needs: build-image
     uses: ./.github/workflows/call-integration-release.yaml
     with:
-      image: "europe-docker.pkg.dev/kyma-project/prod/api-gateway/releases/api-gateway-manager:${{ env.current_release }}"
+      image: "europe-docker.pkg.dev/kyma-project/prod/api-gateway/releases/api-gateway-manager:$current_release"
     secrets: inherit
  
   create-draft:
@@ -66,19 +66,19 @@ jobs:
       - name: Create changelog
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./scripts/create_changelog.sh ${{ env.current_release }}
+        run: ./scripts/create_changelog.sh $current_release
 
       - name: Create draft release
         id: create-draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_ID=$(./scripts/create_draft_release.sh ${{ env.current_release }})
+          RELEASE_ID=$(./scripts/create_draft_release.sh $current_release
           echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
 
       - name: Create lightweight tag
         run: |
-          git tag ${{ env.current_release }}
+          git tag $current_release
           git push origin ${{ env.current_release }}
 
     outputs:
