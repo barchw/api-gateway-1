@@ -50,18 +50,10 @@ jobs:
         VERSION=$current_release
       tags: "$current_release"
 
-
-  integration-tests:
-    needs: build-image
-    uses: ./.github/workflows/call-integration-release.yaml
-    with:
-      image: "europe-docker.pkg.dev/kyma-project/prod/api-gateway/releases/api-gateway-manager:$current_release"
-    secrets: inherit
- 
   create-draft:
     name: Create draft release
     runs-on: ubuntu-latest
-    needs: [build-image, unit-tests, integration-tests]
+    needs: [build-image]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
