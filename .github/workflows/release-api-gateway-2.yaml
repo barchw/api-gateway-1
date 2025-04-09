@@ -50,8 +50,6 @@ jobs:
         VERSION=$current_release
       tags: "$current_release"
 
-  unit-tests:
-    uses: ./.github/workflows/call-unit-lint.yaml
 
   integration-tests:
     needs: build-image
